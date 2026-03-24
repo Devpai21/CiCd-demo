@@ -1,0 +1,33 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check Dockerfile exists
+        run: |
+          if [ ! -f "Dockerfile" ]; then
+            echo "Dockerfile not found!"
+            exit 1
+          fi
+          echo "Dockerfile found"
+
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image..."
+          docker build -t my-app:latest .
+      - name: Show images
+        run: docker images
