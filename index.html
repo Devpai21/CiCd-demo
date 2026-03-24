@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cheer Up - Tinker Bell</title>
+    <title>Cheer Up - Tinker Bell Magic</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         body {
             background: linear-gradient(135deg, #1a472a 0%, #2a6230 50%, #3c8c40 100%);
             min-height: 100vh;
-            font-family: 'Segoe UI', 'Comic Neue', cursive;
+            font-family: 'Segoe UI', 'Comic Neue', cursive, 'Apple Color Emoji', 'Noto Color Emoji';
             overflow: hidden;
             position: relative;
         }
@@ -48,13 +48,14 @@
             color: #2c3e50;
             margin: 20px 0;
         }
-        .tinkerbell {
+        .fairy {
             position: absolute;
             pointer-events: none;
             z-index: 20;
-            filter: drop-shadow(0 0 8px gold);
-            width: 65px;
-            height: auto;
+            font-size: 3rem;
+            filter: drop-shadow(0 0 5px gold);
+            text-shadow: 0 0 5px gold;
+            animation: none;
             transition: none;
         }
         .sparkle {
@@ -89,6 +90,17 @@
             z-index: 30;
             font-family: monospace;
         }
+        .click-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 30;
+        }
     </style>
 </head>
 <body>
@@ -97,15 +109,12 @@
         <p>I'm here for you 🧚‍♀️</p>
         <p style="font-size: 2rem;">💚 🌟 ✨</p>
     </div>
-    <div class="counter">Tinker Bells flying: <span id="fairyCount">0</span></div>
+    <div class="counter">✨ Fairies flying: <span id="fairyCount">0</span></div>
+    <div class="click-hint">✨ Click anywhere to summon more fairies! ✨</div>
 
     <script>
-        // REAL Tinker Bell images
-        const tinkerImages = [
-            'https://pngall.com/wp-content/uploads/2016/04/Tinkerbell-PNG-Image.png',
-            'https://bootflare.com/wp-content/uploads/2025/08/Tinkerbell-Character-Logo-PNG-1024x1024.webp',
-            'https://bootflare.com/wp-content/uploads/2025/08/Tinkerbell-Disney-Logo-PNG-1024x1024.webp'
-        ];
+        // Fairy emojis (always work, no images needed!)
+        const fairyEmojis = ['🧚', '🧚‍♀️', '🧚‍♂️', '✨', '⭐', '💫', '🦋', '🌸'];
         
         let activeFairies = [];
         let fairyId = 0;
@@ -133,19 +142,25 @@
         
         function createFairy() {
             const id = fairyId++;
-            const tinker = document.createElement('img');
-            const randomImage = tinkerImages[Math.floor(Math.random() * tinkerImages.length)];
-            tinker.src = randomImage;
-            tinker.className = 'tinkerbell';
-            tinker.id = `fairy-${id}`;
+            const fairy = document.createElement('div');
+            fairy.className = 'fairy';
+            fairy.id = `fairy-${id}`;
+            
+            // Random emoji from the list
+            const randomEmoji = fairyEmojis[Math.floor(Math.random() * fairyEmojis.length)];
+            fairy.textContent = randomEmoji;
             
             // Random starting position
             const startX = Math.random() * window.innerWidth;
             const startY = Math.random() * window.innerHeight;
-            tinker.style.left = startX + 'px';
-            tinker.style.top = startY + 'px';
+            fairy.style.left = startX + 'px';
+            fairy.style.top = startY + 'px';
             
-            document.body.appendChild(tinker);
+            // Random size
+            const size = 2 + Math.random() * 1.5;
+            fairy.style.fontSize = `${size}rem`;
+            
+            document.body.appendChild(fairy);
             
             // Random movement properties
             let x = startX;
@@ -153,21 +168,22 @@
             let angle = Math.random() * Math.PI * 2;
             let speed = 0.5 + Math.random() * 1.5;
             let rotation = 0;
-            let rotationSpeed = (Math.random() - 0.5) * 10;
+            let rotationSpeed = (Math.random() - 0.5) * 8;
             
             // Store fairy data
-            const fairy = {
+            const fairyData = {
                 id: id,
-                element: tinker,
+                element: fairy,
                 x: x,
                 y: y,
                 angle: angle,
                 speed: speed,
                 rotation: rotation,
                 rotationSpeed: rotationSpeed,
-                lastSparkle: Date.now()
+                lastSparkle: Date.now(),
+                emoji: randomEmoji
             };
-            activeFairies.push(fairy);
+            activeFairies.push(fairyData);
             updateCounter();
             
             // Animation loop
@@ -209,7 +225,7 @@
             
             animate();
             
-            // Remove fairy after 60 seconds (keeps page from getting too crowded)
+            // Remove fairy after 45 seconds
             setTimeout(() => {
                 const idx = activeFairies.findIndex(f => f.id === id);
                 if (idx !== -1) {
@@ -217,26 +233,30 @@
                     activeFairies.splice(idx, 1);
                     updateCounter();
                 }
-            }, 60000);
+            }, 45000);
         }
         
         // Create initial fairies
-        for (let i = 0; i < 12; i++) {
-            setTimeout(() => createFairy(), i * 300);
+        for (let i = 0; i < 15; i++) {
+            setTimeout(() => createFairy(), i * 200);
         }
         
-        // Continuously add new fairies every 5 seconds
+        // Continuously add new fairies every 4 seconds
         setInterval(() => {
-            if (activeFairies.length < 20) {
+            if (activeFairies.length < 25) {
                 createFairy();
             }
-        }, 5000);
+        }, 4000);
         
-        // Also add fairies on click
+        // Add fairies on click
         document.body.addEventListener('click', function(e) {
             createFairy();
-            // Also create sparkles at click location
             createSparkles(e.clientX, e.clientY);
+        });
+        
+        // Resize handling
+        window.addEventListener('resize', () => {
+            // Optional: reposition fairies? Not needed, they'll wrap naturally
         });
     </script>
 </body>
