@@ -1,10 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>CI/CD Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cheer Up!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Comic Neue', 'Comic Neue', cursive, 'Segoe UI', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+        .message {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 30px;
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            animation: bounce 2s ease infinite;
+        }
+        h1 {
+            font-size: 4rem;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #ffe0e0;
+        }
+        p {
+            font-size: 1.5rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .emoji {
+            font-size: 3rem;
+            animation: spin 3s ease infinite;
+            display: inline-block;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fairy {
+            position: absolute;
+            font-size: 2rem;
+            pointer-events: none;
+            animation: float linear infinite;
+            z-index: 5;
+        }
+        @keyframes float {
+            0% {
+                transform: translateX(-100vw) translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100vw) translateY(-200px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Deployed with GitHub Actions!</h1>
-    <p>This is my CI/CD pipeline demo.</p>
+    <div class="message">
+        <h1>✨ Cheer Up! ✨</h1>
+        <p>You're doing amazing things</p>
+        <p>Keep going — you've got this! 💪</p>
+        <div class="emoji">🌈 🌟 🚀</div>
+    </div>
+
+    <script>
+        // Create flying fairies
+        const fairyEmojis = ['🧚', '🧚‍♀️', '🧚‍♂️', '✨', '⭐', '💫', '🌸', '🦋', '🐞', '🌟'];
+        
+        function createFairy() {
+            const fairy = document.createElement('div');
+            fairy.className = 'fairy';
+            const randomEmoji = fairyEmojis[Math.floor(Math.random() * fairyEmojis.length)];
+            fairy.textContent = randomEmoji;
+            
+            // Random size
+            const size = Math.random() * 2 + 1;
+            fairy.style.fontSize = `${size}rem`;
+            
+            // Random vertical position
+            const yPos = Math.random() * window.innerHeight;
+            fairy.style.top = `${yPos}px`;
+            
+            // Random animation duration
+            const duration = Math.random() * 8 + 4;
+            fairy.style.animationDuration = `${duration}s`;
+            
+            // Random delay
+            const delay = Math.random() * 5;
+            fairy.style.animationDelay = `${delay}s`;
+            
+            document.body.appendChild(fairy);
+            
+            // Remove fairy after animation ends
+            setTimeout(() => {
+                fairy.remove();
+            }, duration * 1000);
+        }
+        
+        // Create fairies continuously
+        setInterval(createFairy, 300);
+        
+        // Create initial batch
+        for (let i = 0; i < 10; i++) {
+            setTimeout(createFairy, i * 200);
+        }
+    </script>
 </body>
 </html>
