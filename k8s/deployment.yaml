@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cicd-demo
+  namespace: cicd-demo
 spec:
   replicas: 2
   selector:
@@ -14,7 +15,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: nginx:alpine
+        image: devpai/cicd-demo:latest
         ports:
         - containerPort: 80
 ---
@@ -22,6 +23,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: cicd-demo
+  namespace: cicd-demo
 spec:
   selector:
     app: cicd-demo
