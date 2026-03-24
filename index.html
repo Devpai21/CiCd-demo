@@ -13,13 +13,9 @@
         body {
             background: linear-gradient(135deg, #1a472a 0%, #2a6230 50%, #3c8c40 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             font-family: 'Segoe UI', 'Comic Neue', cursive;
             overflow: hidden;
             position: relative;
-            cursor: pointer;
         }
         .message {
             background: rgba(255, 255, 255, 0.95);
@@ -27,10 +23,15 @@
             padding: 50px 80px;
             text-align: center;
             box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 10;
             backdrop-filter: blur(10px);
             border: 3px solid gold;
             animation: glow 2s ease-in-out infinite;
+            white-space: nowrap;
         }
         @keyframes glow {
             0%, 100% { box-shadow: 0 0 20px gold; }
@@ -51,18 +52,10 @@
             position: absolute;
             pointer-events: none;
             z-index: 20;
-            filter: drop-shadow(0 0 5px gold);
-            animation: fly 3s ease-out forwards;
-        }
-        @keyframes fly {
-            0% {
-                transform: translateX(0) translateY(0) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(var(--fly-x, 300px)) translateY(var(--fly-y, -200px)) rotate(720deg);
-                opacity: 0;
-            }
+            filter: drop-shadow(0 0 8px gold);
+            width: 65px;
+            height: auto;
+            transition: none;
         }
         .sparkle {
             position: absolute;
@@ -84,17 +77,17 @@
                 opacity: 0;
             }
         }
-        .click-hint {
+        .counter {
             position: fixed;
             bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 20px;
             color: white;
             background: rgba(0,0,0,0.6);
-            padding: 10px 20px;
-            border-radius: 30px;
+            padding: 8px 15px;
+            border-radius: 20px;
             font-size: 14px;
             z-index: 30;
+            font-family: monospace;
         }
     </style>
 </head>
@@ -102,82 +95,149 @@
     <div class="message">
         <h1>✨ Cheer Up Beautiful ✨</h1>
         <p>I'm here for you 🧚‍♀️</p>
-        <p style="font-size: 2.5rem;">💚 🌟 💫</p>
+        <p style="font-size: 2rem;">💚 🌟 ✨</p>
     </div>
-    <div class="click-hint">Click anywhere to make Tinker Bell fly! ✨</div>
+    <div class="counter">Tinker Bells flying: <span id="fairyCount">0</span></div>
 
     <script>
-        // Tinker Bell images (fairy icons)
+        // REAL Tinker Bell images
         const tinkerImages = [
-            'https://cdn-icons-png.flaticon.com/512/1998/1998625.png',
-            'https://cdn-icons-png.flaticon.com/512/1998/1998619.png',
-            'https://cdn-icons-png.flaticon.com/512/1998/1998620.png',
-            'https://cdn-icons-png.flaticon.com/512/2917/2917995.png'
+            'https://pngall.com/wp-content/uploads/2016/04/Tinkerbell-PNG-Image.png',
+            'https://bootflare.com/wp-content/uploads/2025/08/Tinkerbell-Character-Logo-PNG-1024x1024.webp',
+            'https://bootflare.com/wp-content/uploads/2025/08/Tinkerbell-Disney-Logo-PNG-1024x1024.webp'
         ];
         
+        let activeFairies = [];
+        let fairyId = 0;
+        
         function createSparkles(x, y) {
-            for (let i = 0; i < 12; i++) {
+            for (let i = 0; i < 8; i++) {
                 setTimeout(() => {
                     const sparkle = document.createElement('div');
                     sparkle.className = 'sparkle';
                     const angle = Math.random() * Math.PI * 2;
-                    const distance = Math.random() * 50;
+                    const distance = Math.random() * 40;
                     const offsetX = Math.cos(angle) * distance;
                     const offsetY = Math.sin(angle) * distance;
                     sparkle.style.left = (x + offsetX) + 'px';
                     sparkle.style.top = (y + offsetY) + 'px';
                     document.body.appendChild(sparkle);
                     setTimeout(() => sparkle.remove(), 500);
-                }, i * 30);
+                }, i * 20);
             }
         }
         
-        function createTinkerBell(x, y) {
+        function updateCounter() {
+            document.getElementById('fairyCount').innerText = activeFairies.length;
+        }
+        
+        function createFairy() {
+            const id = fairyId++;
             const tinker = document.createElement('img');
             const randomImage = tinkerImages[Math.floor(Math.random() * tinkerImages.length)];
             tinker.src = randomImage;
             tinker.className = 'tinkerbell';
-            tinker.style.left = x + 'px';
-            tinker.style.top = y + 'px';
-            tinker.style.width = '55px';
-            tinker.style.height = '55px';
+            tinker.id = `fairy-${id}`;
             
-            // Random flight direction
-            const flyX = (Math.random() * 400) - 200;
-            const flyY = (Math.random() * 300) - 150;
-            tinker.style.setProperty('--fly-x', flyX + 'px');
-            tinker.style.setProperty('--fly-y', flyY + 'px');
+            // Random starting position
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+            tinker.style.left = startX + 'px';
+            tinker.style.top = startY + 'px';
             
             document.body.appendChild(tinker);
-            createSparkles(x, y);
             
+            // Random movement properties
+            let x = startX;
+            let y = startY;
+            let angle = Math.random() * Math.PI * 2;
+            let speed = 0.5 + Math.random() * 1.5;
+            let rotation = 0;
+            let rotationSpeed = (Math.random() - 0.5) * 10;
+            
+            // Store fairy data
+            const fairy = {
+                id: id,
+                element: tinker,
+                x: x,
+                y: y,
+                angle: angle,
+                speed: speed,
+                rotation: rotation,
+                rotationSpeed: rotationSpeed,
+                lastSparkle: Date.now()
+            };
+            activeFairies.push(fairy);
+            updateCounter();
+            
+            // Animation loop
+            function animate() {
+                const index = activeFairies.findIndex(f => f.id === id);
+                if (index === -1) return;
+                
+                const f = activeFairies[index];
+                
+                // Change direction occasionally (random walk)
+                if (Math.random() < 0.02) {
+                    f.angle += (Math.random() - 0.5) * Math.PI / 2;
+                }
+                
+                // Update position
+                f.x += Math.cos(f.angle) * f.speed;
+                f.y += Math.sin(f.angle) * f.speed;
+                f.rotation += f.rotationSpeed;
+                
+                // Wrap around screen edges
+                if (f.x > window.innerWidth + 50) f.x = -50;
+                if (f.x < -50) f.x = window.innerWidth + 50;
+                if (f.y > window.innerHeight + 50) f.y = -50;
+                if (f.y < -50) f.y = window.innerHeight + 50;
+                
+                // Apply position and rotation
+                f.element.style.left = f.x + 'px';
+                f.element.style.top = f.y + 'px';
+                f.element.style.transform = `rotate(${f.rotation}deg)`;
+                
+                // Create sparkles occasionally
+                if (Date.now() - f.lastSparkle > 400) {
+                    createSparkles(f.x + 25, f.y + 25);
+                    f.lastSparkle = Date.now();
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+            
+            // Remove fairy after 60 seconds (keeps page from getting too crowded)
             setTimeout(() => {
-                tinker.remove();
-            }, 2900);
+                const idx = activeFairies.findIndex(f => f.id === id);
+                if (idx !== -1) {
+                    f.element.remove();
+                    activeFairies.splice(idx, 1);
+                    updateCounter();
+                }
+            }, 60000);
         }
         
-        // Create Tinker Bell on click
-        document.body.addEventListener('click', function(e) {
-            createTinkerBell(e.clientX, e.clientY);
-        });
+        // Create initial fairies
+        for (let i = 0; i < 12; i++) {
+            setTimeout(() => createFairy(), i * 300);
+        }
         
-        // Create a few fairies automatically on load
-        setTimeout(() => {
-            createTinkerBell(window.innerWidth / 2, window.innerHeight / 2);
-        }, 500);
-        setTimeout(() => {
-            createTinkerBell(window.innerWidth / 3, window.innerHeight / 2);
-        }, 1500);
-        setTimeout(() => {
-            createTinkerBell(window.innerWidth * 0.7, window.innerHeight * 0.6);
-        }, 2500);
-        
-        // Continuous fairy generation every 8 seconds
+        // Continuously add new fairies every 5 seconds
         setInterval(() => {
-            const randomX = Math.random() * window.innerWidth;
-            const randomY = Math.random() * window.innerHeight;
-            createTinkerBell(randomX, randomY);
-        }, 8000);
+            if (activeFairies.length < 20) {
+                createFairy();
+            }
+        }, 5000);
+        
+        // Also add fairies on click
+        document.body.addEventListener('click', function(e) {
+            createFairy();
+            // Also create sparkles at click location
+            createSparkles(e.clientX, e.clientY);
+        });
     </script>
 </body>
 </html>
