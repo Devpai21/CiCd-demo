@@ -31,3 +31,11 @@ jobs:
           docker build -t my-app:latest .
       - name: Show images
         run: docker images
+
+      - name: Push to Docker Hub
+        run: |
+          echo "Pushing to Docker Hub..."
+          docker push ${{ secrets.DOCKER_USERNAME }}/cicd-demo:latest
+      
+      - name: Show images
+        run: docker images
