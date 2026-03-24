@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cheer Up!</title>
+    <title>Cheer Up - Tinker Bell</title>
     <style>
         * {
             margin: 0;
@@ -11,117 +11,173 @@
             box-sizing: border-box;
         }
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a472a 0%, #2a6230 50%, #3c8c40 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Comic Neue', 'Comic Neue', cursive, 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', 'Comic Neue', cursive;
             overflow: hidden;
             position: relative;
+            cursor: pointer;
         }
         .message {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 30px;
-            padding: 40px 60px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 60px;
+            padding: 50px 80px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
             z-index: 10;
-            backdrop-filter: blur(5px);
-            animation: bounce 2s ease infinite;
+            backdrop-filter: blur(10px);
+            border: 3px solid gold;
+            animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px gold; }
+            50% { box-shadow: 0 0 40px #ffd700; }
         }
         h1 {
-            font-size: 4rem;
-            color: #ff6b6b;
+            font-size: 3.5rem;
+            color: #ff69b4;
             margin-bottom: 20px;
-            text-shadow: 3px 3px 0 #ffe0e0;
+            text-shadow: 3px 3px 0 #fff0f5;
         }
         p {
-            font-size: 1.5rem;
-            color: #555;
-            margin-bottom: 20px;
-        }
-        .emoji {
-            font-size: 3rem;
-            animation: spin 3s ease infinite;
-            display: inline-block;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .fairy {
-            position: absolute;
             font-size: 2rem;
-            pointer-events: none;
-            animation: float linear infinite;
-            z-index: 5;
+            color: #2c3e50;
+            margin: 20px 0;
         }
-        @keyframes float {
+        .tinkerbell {
+            position: absolute;
+            pointer-events: none;
+            z-index: 20;
+            filter: drop-shadow(0 0 5px gold);
+            animation: fly 3s ease-out forwards;
+        }
+        @keyframes fly {
             0% {
-                transform: translateX(-100vw) translateY(0) rotate(0deg);
+                transform: translateX(0) translateY(0) rotate(0deg);
                 opacity: 1;
             }
             100% {
-                transform: translateX(100vw) translateY(-200px) rotate(360deg);
+                transform: translateX(var(--fly-x, 300px)) translateY(var(--fly-y, -200px)) rotate(720deg);
                 opacity: 0;
             }
+        }
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: gold;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparklePulse 0.5s ease-out forwards;
+            z-index: 25;
+        }
+        @keyframes sparklePulse {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        .click-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 30;
         }
     </style>
 </head>
 <body>
     <div class="message">
-        <h1>✨ Cheer Up! ✨</h1>
-        <p>You're doing amazing things</p>
-        <p>Keep going — you've got this! 💪</p>
-        <div class="emoji">🌈 🌟 🚀</div>
+        <h1>✨ Cheer Up Beautiful ✨</h1>
+        <p>I'm here for you 🧚‍♀️</p>
+        <p style="font-size: 2.5rem;">💚 🌟 💫</p>
     </div>
+    <div class="click-hint">Click anywhere to make Tinker Bell fly! ✨</div>
 
     <script>
-        // Create flying fairies
-        const fairyEmojis = ['🧚', '🧚‍♀️', '🧚‍♂️', '✨', '⭐', '💫', '🌸', '🦋', '🐞', '🌟'];
+        // Tinker Bell images (fairy icons)
+        const tinkerImages = [
+            'https://cdn-icons-png.flaticon.com/512/1998/1998625.png',
+            'https://cdn-icons-png.flaticon.com/512/1998/1998619.png',
+            'https://cdn-icons-png.flaticon.com/512/1998/1998620.png',
+            'https://cdn-icons-png.flaticon.com/512/2917/2917995.png'
+        ];
         
-        function createFairy() {
-            const fairy = document.createElement('div');
-            fairy.className = 'fairy';
-            const randomEmoji = fairyEmojis[Math.floor(Math.random() * fairyEmojis.length)];
-            fairy.textContent = randomEmoji;
+        function createSparkles(x, y) {
+            for (let i = 0; i < 12; i++) {
+                setTimeout(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = Math.random() * 50;
+                    const offsetX = Math.cos(angle) * distance;
+                    const offsetY = Math.sin(angle) * distance;
+                    sparkle.style.left = (x + offsetX) + 'px';
+                    sparkle.style.top = (y + offsetY) + 'px';
+                    document.body.appendChild(sparkle);
+                    setTimeout(() => sparkle.remove(), 500);
+                }, i * 30);
+            }
+        }
+        
+        function createTinkerBell(x, y) {
+            const tinker = document.createElement('img');
+            const randomImage = tinkerImages[Math.floor(Math.random() * tinkerImages.length)];
+            tinker.src = randomImage;
+            tinker.className = 'tinkerbell';
+            tinker.style.left = x + 'px';
+            tinker.style.top = y + 'px';
+            tinker.style.width = '55px';
+            tinker.style.height = '55px';
             
-            // Random size
-            const size = Math.random() * 2 + 1;
-            fairy.style.fontSize = `${size}rem`;
+            // Random flight direction
+            const flyX = (Math.random() * 400) - 200;
+            const flyY = (Math.random() * 300) - 150;
+            tinker.style.setProperty('--fly-x', flyX + 'px');
+            tinker.style.setProperty('--fly-y', flyY + 'px');
             
-            // Random vertical position
-            const yPos = Math.random() * window.innerHeight;
-            fairy.style.top = `${yPos}px`;
+            document.body.appendChild(tinker);
+            createSparkles(x, y);
             
-            // Random animation duration
-            const duration = Math.random() * 8 + 4;
-            fairy.style.animationDuration = `${duration}s`;
-            
-            // Random delay
-            const delay = Math.random() * 5;
-            fairy.style.animationDelay = `${delay}s`;
-            
-            document.body.appendChild(fairy);
-            
-            // Remove fairy after animation ends
             setTimeout(() => {
-                fairy.remove();
-            }, duration * 1000);
+                tinker.remove();
+            }, 2900);
         }
         
-        // Create fairies continuously
-        setInterval(createFairy, 300);
+        // Create Tinker Bell on click
+        document.body.addEventListener('click', function(e) {
+            createTinkerBell(e.clientX, e.clientY);
+        });
         
-        // Create initial batch
-        for (let i = 0; i < 10; i++) {
-            setTimeout(createFairy, i * 200);
-        }
+        // Create a few fairies automatically on load
+        setTimeout(() => {
+            createTinkerBell(window.innerWidth / 2, window.innerHeight / 2);
+        }, 500);
+        setTimeout(() => {
+            createTinkerBell(window.innerWidth / 3, window.innerHeight / 2);
+        }, 1500);
+        setTimeout(() => {
+            createTinkerBell(window.innerWidth * 0.7, window.innerHeight * 0.6);
+        }, 2500);
+        
+        // Continuous fairy generation every 8 seconds
+        setInterval(() => {
+            const randomX = Math.random() * window.innerWidth;
+            const randomY = Math.random() * window.innerHeight;
+            createTinkerBell(randomX, randomY);
+        }, 8000);
     </script>
 </body>
 </html>
