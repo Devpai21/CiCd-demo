@@ -69,3 +69,9 @@ jobs:
           run: |
             kubectl apply -f k8s/deployment.yaml
             kubectl rollout status deployment/cicd-demo -n cicd-demo
+
+        - name: Deploy to LKE
+          run: |
+            kubectl apply -f k8s/deployment.yaml
+            kubectl rollout status deployment/cicd-demo -n cicd-demo
+            kubectl rollout restart deployment/cicd-demo -n cicd-demo
