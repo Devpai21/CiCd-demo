@@ -16,8 +16,12 @@ spec:
       containers:
       - name: app
         image: devpai/cicd-demo:latest
+        imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 8080
+        env:
+        - name: COMMIT_HASH
+          value: "latest"
 ---
 apiVersion: v1
 kind: Service
@@ -29,5 +33,5 @@ spec:
     app: cicd-demo
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: 8080
   type: LoadBalancer
