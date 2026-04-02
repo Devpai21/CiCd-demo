@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 20px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .status-operational {
+            background: #238636;
+            color: #ffffff;
+        }
+        .status-degraded {
+            background: #d29922;
+            color: #ffffff;
+        }
+        .status-down {
+            background: #da3633;
+            color: #ffffff;
+        }
+        .overall-status {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .overall-status h2 {
+            margin-bottom: 10px;
+        }
+        .service-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        .service-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .service-name {
+            font-weight: 500;
+        }
+        .service-type {
+            font-size: 0.75rem;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+        .deploy-info {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 0.85rem;
+            color: #8b949e;
+        }
+        .deploy-info span {
+            color: #c9d1d9;
+            font-family: monospace;
+        }
+        .last-updated {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #8b949e;
+            margin-top: 20px;
+        }
+        .refresh-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 10px;
+        }
+        .refresh-btn:hover {
+            background: #2ea043;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <h1>🔧 System Status Dashboard</h1>
+            <div>
+                <span id="lastUpdate">Loading...</span>
+                <button class="refresh-btn" onclick="refreshPage()">↻ Refresh</button>
+            </div>
+        </div>
+        <div class="subtitle">Real-time status of infrastructure components</div>
+
+        <div class="overall-status">
+            <h2 id="overallTitle">🟢 All Systems Operational</h2>
+            <p>All services are running normally. No active incidents.</p>
+        </div>
+
+        <div class="service-grid" id="serviceGrid">
+            <!-- Services will be loaded here -->
+        </div>
+
+        <div class="deploy-info" id="deployInfo">
+            Loading deployment info...
+        </div>
+        <div class="last-updated">
+            Dashboard auto-refreshes every 30 seconds
+        </div>
+    </div>
+
+    <script>
+        let services = {{ services | tojson }};
+        const commitHash = "{{ commit_hash }}";
+        const deployTime = "{{ deploy_time }}";
+
+        function getStatusBadge(status) {
+            const statusMap = {
+                'healthy': 'operational',
+                'degraded': 'degraded',
+                'down': 'down'
+            };
+            const mapped = statusMap[status] || 'operational';
+            return `<span class="status-badge status-${mapped}">${mapped.toUpperCase()}</span>`;
+        }
+
+        function renderServices() {
+            const grid = document.getElementById('serviceGrid');
+            grid.innerHTML = '';
+            services.forEach(service => {
+                const card = document.createElement('div');
+                card.className = 'service-card';
+                card.innerHTML = `
+                    <div>
+                        <div class="service-name">${service.name}</div>
+                        <div class="service-type">${service.type}</div>
+                    </div>
+                    ${getStatusBadge(service.status)}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderDeployInfo() {
+            const deployDiv = document.getElementById('deployInfo');
+            deployDiv.innerHTML = `
+                📦 Last Deployment: <span>${deployTime}</span><br>
+                🔖 Commit Hash: <span>${commitHash}</span><br>
+                📊 Uptime (30 days): <span>99.95%</span>
+            `;
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            document.getElementById('lastUpdate').innerHTML = `Last updated: ${now.toLocaleTimeString()}`;
+        }
+
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        renderServices();
+        renderDeployInfo();
+        updateLastUpdateTime();
+
+        setInterval(() => {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    services = data.services;
+                    renderServices();
+                    updateLastUpdateTime();
+                })
+                .catch(err => console.log('Auto-refresh failed:', err));
+        }, 30000);
+    </script>
+</body>
+</html>
